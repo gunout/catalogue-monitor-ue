@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>🇪🇺 Catalogue Monitor — data.europa.eu</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue-france:#000091; --blue-france-hi:#1212ff; --blue-france-soft:#e3e3fd;
+  --red-marianne:#E1000F; --red-marianne-soft:#ffe9e9;
+  --gold:#ffb800; --green-bourgeon:#18753c; --green-emeraude:#00a95f;
+  --white:#fff; --grey-50:#f6f6f6; --grey-100:#eee; --grey-200:#e5e5e5;
+  --grey-500:#929292; --grey-700:#3a3a3a; --grey-900:#1e1e1e;
+  --font-mono:'SF Mono',Menlo,Consolas,'Courier New',monospace;
+  --font-sans:'Marianne',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --bg-app:#f6f6f6; --bg-panel:#fff; --border:#e5e5e5; --text:#1e1e1e; --text-muted:#929292;
+}
+[data-theme="dark"]{
+  --white:#1a1d24; --grey-50:#12141a; --grey-100:#1e2129; --grey-200:#2a2e38;
+  --grey-500:#7a8090; --grey-700:#b8bcc6; --grey-900:#f0f2f5;
+  --blue-france-soft:#1a2340; --blue-france:#5b7fd6; --blue-france-hi:#7d9ce6;
+  --red-marianne-soft:#3a1a1e;
+  --bg-app:#12141a; --bg-panel:#1a1d24; --border:#2a2e38; --text:#f0f2f5; --text-muted:#7a8090;
+}
+html{height:100%}
+body{font-family:var(--font-sans);background:var(--bg-app);color:var(--text);
+  font-size:13px;line-height:1.5;min-height:100%;-webkit-font-smoothing:antialiased;
+  transition:background .3s,color .3s;}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:var(--grey-100)}
+::-webkit-scrollbar-thumb{background:var(--grey-500);border-radius:4px}
+
+.marianne-band{height:6px;background:linear-gradient(to right,
+  var(--blue-france) 0%,var(--blue-france) 33.33%,
+  var(--white) 33.33%,var(--white) 66.66%,
+  var(--red-marianne) 66.66%,var(--red-marianne) 100%);}
+
+.bloc-marque{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg-panel);border-bottom:1px solid var(--border);}
+.bloc-marque-logo{font-weight:700;font-size:13px;line-height:1.15;color:var(--text);letter-spacing:.3px;text-transform:uppercase;border-right:1px solid var(--border);padding-right:12px;}
+.bloc-marque-devise{font-size:10px;color:var(--grey-700);letter-spacing:.5px;}
+.bloc-marque-devise em{display:block;font-style:normal;text-transform:uppercase;letter-spacing:1.2px;font-size:9px;color:var(--grey-500);}
+
+.topbar{background:var(--bg-panel);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:10px 16px;gap:12px;position:sticky;top:6px;z-index:100;flex-wrap:wrap;box-shadow:0 2px 6px rgba(0,0,0,.04);}
+.brand{font-size:14px;font-weight:700;color:var(--blue-france);display:flex;align-items:center;gap:8px;white-space:nowrap;}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:var(--green-emeraude);box-shadow:0 0 0 3px rgba(0,169,95,.2);animation:pulse 1.8s infinite;flex-shrink:0;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.brand .sub{color:var(--grey-500);font-weight:400;font-size:12px;font-family:var(--font-mono);}
+
+.topbar-right{margin-left:auto;display:flex;gap:12px;font-family:var(--font-mono);font-size:11px;align-items:center;flex-wrap:wrap;}
+.topbar-stat{display:flex;gap:5px;color:var(--grey-700);align-items:center;white-space:nowrap;}
+.topbar-stat .val{color:var(--blue-france);font-weight:700;padding:2px 6px;border-radius:3px;background:var(--blue-france-soft);}
+.topbar-stat .val.green{color:var(--green-bourgeon);background:rgba(24,117,60,.15)}
+.topbar-stat .val.amber{color:#8a5e00;background:rgba(255,184,0,.2)}
+.topbar-stat .val.red{color:var(--red-marianne);background:var(--red-marianne-soft)}
+.theme-toggle{background:var(--bg-panel);border:1px solid var(--border);color:var(--text);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.theme-toggle:hover{background:var(--blue-france-soft);border-color:var(--blue-france);transform:scale(1.05);}
+
+.app{display:grid;grid-template-columns:340px 1fr 300px;height:calc(100vh - 130px);overflow:hidden;}
+
+.sidebar{background:var(--bg-panel);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+.sb-head{padding:14px 16px;border-bottom:1px solid var(--border);background:var(--grey-50);flex-shrink:0;}
+.sb-title{font-size:12px;font-weight:700;color:var(--blue-france);letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.sb-title::before{content:'';width:4px;height:14px;background:var(--red-marianne);}
+.sb-count{font-family:var(--font-mono);font-size:11px;color:var(--grey-500);margin-top:6px;}
+.sb-actions{display:flex;gap:4px;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--grey-50);flex-shrink:0;}
+.sb-actions button{flex:1;background:var(--bg-panel);border:1px solid var(--border);color:var(--grey-700);font-size:10px;font-weight:600;padding:5px 6px;border-radius:3px;cursor:pointer;transition:all .15s;font-family:var(--font-sans);}
+.sb-actions button:hover{border-color:var(--blue-france);color:var(--blue-france);background:var(--blue-france-soft);}
+
+.sb-body{flex:1;overflow-y:auto;padding:8px;min-height:0;}
+
+.facet-panel{background:var(--bg-panel);border:1px solid var(--border);border-radius:4px;margin-bottom:8px;overflow:hidden;}
+.facet-head{padding:8px 10px;background:var(--grey-50);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--blue-france);text-transform:uppercase;letter-spacing:.5px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none;}
+.facet-head .arrow{transition:transform .2s;font-size:10px;}
+.facet-panel.collapsed .facet-head .arrow{transform:rotate(-90deg);}
+.facet-panel.collapsed .facet-body{display:none;}
+.facet-body{padding:6px 8px;max-height:280px;overflow-y:auto;}
+.facet-item{display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:3px;cursor:pointer;font-size:11px;transition:all .15s;}
+.facet-item:hover{background:var(--grey-50);}
+.facet-item.checked{background:var(--blue-france-soft);}
+.facet-item input{cursor:pointer;accent-color:var(--blue-france);flex-shrink:0;}
+.facet-item .flabel{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.facet-item .fcount{font-family:var(--font-mono);font-size:10px;color:var(--grey-500);font-weight:700;flex-shrink:0;}
+.facet-item.checked .fcount{color:var(--blue-france);}
+
+.facet-search{padding:6px 8px;border-bottom:1px solid var(--border);}
+.facet-search input{width:100%;border:1px solid var(--border);border-radius:3px;padding:5px 8px;font-size:11px;background:var(--bg-panel);color:var(--text);}
+.facet-search input:focus{outline:none;border-color:var(--blue-france);}
+
+.center{background:var(--bg-app);display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+.search-bar{padding:14px 16px;background:var(--bg-panel);border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.search-bar input[type=text]{flex:1;min-width:180px;background:var(--bg-panel);border:1px solid var(--border);border-radius:4px;padding:11px 14px;font-size:14px;font-family:var(--font-sans);color:var(--text);}
+.search-bar input[type=text]:focus{outline:none;border-color:var(--blue-france);box-shadow:0 0 0 2px var(--blue-france-soft);}
+.search-bar select{background:var(--bg-panel);border:1px solid var(--border);border-radius:4px;padding:11px 12px;font-size:13px;font-family:var(--font-sans);color:var(--text);}
+.search-btn{background:var(--blue-france);color:#fff;border:1px solid var(--blue-france);font-size:13px;font-weight:700;padding:11px 20px;border-radius:4px;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:var(--font-sans);}
+.search-btn:hover{background:var(--blue-france-hi);border-color:var(--blue-france-hi);}
+.search-btn:disabled{opacity:.5;cursor:not-allowed}
+.search-btn.green{background:var(--green-bourgeon);border-color:var(--green-bourgeon)}
+.search-btn.green:hover{background:#0f5a2d;border-color:#0f5a2d}
+.cancel-btn{background:var(--red-marianne);color:#fff;border:1px solid var(--red-marianne);font-size:13px;font-weight:700;padding:11px 16px;border-radius:4px;cursor:pointer;font-family:var(--font-sans);}
+.cancel-btn[hidden]{display:none}
+
+.chips-bar{padding:8px 16px;background:var(--blue-france-soft);border-bottom:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:11px;}
+.chip{background:var(--bg-panel);border:1px solid var(--border);padding:3px 8px;border-radius:12px;font-family:var(--font-mono);font-size:10px;font-weight:600;color:var(--text);display:inline-flex;align-items:center;gap:5px;}
+.chip button{background:none;border:none;color:var(--red-marianne);cursor:pointer;font-size:12px;font-weight:700;padding:0;line-height:1;}
+
+.mode-tabs{display:flex;gap:0;padding:0 10px;border-bottom:1px solid var(--border);background:var(--bg-panel);flex-shrink:0;overflow-x:auto;}
+.mode-tab{background:transparent;border:none;color:var(--grey-700);font-size:12px;font-weight:500;padding:10px 14px;cursor:pointer;transition:all .15s;border-bottom:3px solid transparent;font-family:var(--font-sans);white-space:nowrap;}
+.mode-tab:hover{background:var(--grey-50);color:var(--blue-france)}
+.mode-tab.active{color:var(--blue-france);border-bottom-color:var(--blue-france);font-weight:700;}
+
+.kpi-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;padding:14px;background:var(--bg-panel);border-bottom:1px solid var(--border);flex-shrink:0;}
+.kpi{background:var(--grey-50);border:1px solid var(--border);border-left:4px solid var(--blue-france);border-radius:4px;padding:10px 12px;transition:all .15s;}
+.kpi:hover{border-color:var(--blue-france);background:var(--blue-france-soft);transform:translateY(-2px);}
+.kpi .label{font-size:9px;font-weight:700;color:var(--grey-500);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;}
+.kpi .value{font-size:15px;font-weight:800;color:var(--blue-france);font-family:var(--font-mono);line-height:1.1;word-break:break-all;}
+.kpi .sub{font-size:9px;color:var(--grey-500);margin-top:3px;font-family:var(--font-mono);}
+.kpi.green{border-left-color:var(--green-emeraude)} .kpi.green .value{color:var(--green-bourgeon)}
+.kpi.amber{border-left-color:var(--gold)} .kpi.amber .value{color:#8a5e00}
+.kpi.red{border-left-color:var(--red-marianne)} .kpi.red .value{color:var(--red-marianne)}
+
+.results{flex:1;overflow-y:auto;padding:14px;min-height:0;}
+.result-card{background:var(--bg-panel);border:1px solid var(--border);border-left:4px solid var(--blue-france);border-radius:4px;padding:14px 16px;margin-bottom:10px;transition:all .15s;animation:fadeInUp .35s ease-out;}
+.result-card:hover{border-color:var(--blue-france);box-shadow:0 4px 12px rgba(0,0,145,.08);transform:translateX(2px);}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.rc-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:6px;}
+.rc-title{font-size:14px;font-weight:700;color:var(--text);flex:1;line-height:1.35;}
+.rc-title a{color:var(--text);text-decoration:none}
+.rc-title a:hover{color:var(--blue-france);text-decoration:underline;}
+.rc-badges{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0;}
+.rc-badge{font-family:var(--font-mono);font-size:9px;font-weight:700;padding:3px 7px;border-radius:3px;white-space:nowrap;letter-spacing:.3px;}
+.rc-badge.country{background:var(--blue-france);color:#fff;text-transform:none}
+.rc-badge.index{background:var(--grey-700);color:#fff;text-transform:none}
+.rc-badge.type{background:var(--gold);color:var(--grey-900);text-transform:none}
+.rc-badge.lang{background:var(--green-bourgeon);color:#fff}
+.rc-org{color:var(--grey-700);font-weight:600;font-size:12px;margin-bottom:6px;}
+.rc-desc{font-size:12px;color:var(--grey-700);line-height:1.5;margin-top:6px;}
+.rc-meta{display:flex;gap:6px;font-family:var(--font-mono);font-size:10px;color:var(--grey-500);flex-wrap:wrap;margin-top:8px;}
+.rc-meta .tag{background:var(--grey-50);padding:3px 8px;border-radius:3px;border:1px solid var(--border);color:var(--grey-700);}
+
+.empty,.loading{text-align:center;padding:60px 20px;color:var(--grey-500);font-size:14px;}
+.spin{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--blue-france);border-radius:50%;animation:sp .8s linear infinite;margin:0 auto 14px;}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.help-banner{padding:12px 16px;background:rgba(255,184,0,.15);border-bottom:1px solid var(--gold);color:#8a5e00;font-size:12px;line-height:1.6;}
+.help-banner.info{background:var(--blue-france-soft);border-bottom-color:var(--blue-france);color:var(--blue-france);}
+
+.progress-bar{background:var(--grey-100);height:8px;border-radius:4px;overflow:hidden;margin:8px 0;}
+.progress-fill{background:linear-gradient(90deg,var(--blue-france),var(--blue-france-hi));height:100%;transition:width .3s;}
+
+.export-group{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--border);background:var(--bg-panel);flex-wrap:wrap;}
+.export-btn{flex:1;min-width:100px;background:var(--bg-panel);color:var(--text);border:1px solid var(--border);font-size:12px;font-weight:600;padding:10px 14px;border-radius:4px;cursor:pointer;font-family:var(--font-sans);}
+.export-btn:hover{border-color:var(--blue-france);color:var(--blue-france);background:var(--blue-france-soft);}
+.export-btn:disabled{opacity:.4;cursor:not-allowed}
+
+.right{background:var(--bg-panel);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+.rs-head{padding:14px 16px;border-bottom:1px solid var(--border);background:var(--grey-50);font-size:12px;font-weight:700;color:var(--blue-france);letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
+.rs-head::before{content:'';width:4px;height:14px;background:var(--red-marianne);}
+.rs-body{flex:1;overflow-y:auto;padding:12px;min-height:0;}
+.intel-panel{background:var(--bg-panel);border:1px solid var(--border);border-radius:4px;margin-bottom:10px;overflow:hidden;}
+.intel-head{padding:9px 12px;background:var(--grey-50);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--blue-france);letter-spacing:.5px;text-transform:uppercase;}
+.intel-body{padding:10px}
+.intel-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--grey-100);font-size:12px;}
+.intel-row:last-child{border-bottom:none}
+.intel-row .k{color:var(--grey-700)}
+.intel-row .v{color:var(--text);font-weight:700;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;font-family:var(--font-mono);font-size:11px;}
+.intel-row .v.cyan{color:var(--blue-france)}
+.intel-row .v.green{color:var(--green-bourgeon)}
+.intel-row .v.amber{color:#8a5e00}
+.intel-row .v.red{color:var(--red-marianne)}
+
+.toast{position:fixed;bottom:24px;right:24px;background:var(--grey-900);color:#fff;padding:12px 20px;border-radius:6px;font-size:13px;font-weight:600;z-index:1000;box-shadow:0 8px 24px rgba(0,0,0,.2);display:flex;align-items:center;gap:8px;max-width:400px;animation:slideInRight .3s ease-out;}
+.toast.success{background:var(--green-bourgeon)}
+.toast.error{background:var(--red-marianne)}
+.toast.info{background:var(--blue-france)}
+@keyframes slideInRight{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+.bar-row{display:grid;grid-template-columns:220px 1fr 120px;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;}
+.bar-row .name{color:var(--grey-700);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-mono);font-weight:600;}
+.bar-track{background:var(--grey-100);border-radius:3px;height:18px;overflow:hidden;}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--blue-france) 0%,var(--blue-france-hi) 100%);border-radius:3px;width:0;transition:width 1s cubic-bezier(.4,0,.2,1);}
+.bar-fill.green{background:linear-gradient(90deg,var(--green-bourgeon) 0%,var(--green-emeraude) 100%)}
+.bar-fill.gold{background:linear-gradient(90deg,#8a5e00 0%,var(--gold) 100%)}
+.bar-row .val{text-align:right;font-variant-numeric:tabular-nums;color:var(--blue-france);font-weight:700;font-family:var(--font-mono);}
+
+.analytics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:14px;}
+.analytics-panel{background:var(--bg-panel);border:1px solid var(--border);border-radius:6px;overflow:hidden;animation:fadeInUp .35s ease-out;}
+.analytics-panel .panel-head{padding:11px 14px;background:var(--grey-50);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;color:var(--blue-france);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:8px;}
+.analytics-panel .panel-head::before{content:'';width:4px;height:12px;background:var(--red-marianne);}
+.analytics-panel .panel-body{padding:14px;}
+
+@media(max-width:900px){
+  .app{display:flex;flex-direction:column;height:auto;}
+  .sidebar{width:100%;border-right:none;border-bottom:1px solid var(--border);max-height:50vh;}
+  .right{width:100%;border-left:none;border-top:1px solid var(--border);}
+  .results{max-height:70vh;}
+  .analytics-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="marianne-band"></div>
+
+<div class="bloc-marque">
+  <div class="bloc-marque-logo">Catalogue<br>Monitor</div>
+  <div class="bloc-marque-devise"><em>data.europa.eu</em><em>Filtres API + Proxy</em></div>
+</div>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="dot" id="statusDot"></span>
+    CATALOGUE MONITOR
+    <span class="sub">/ proxy CORS</span>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-stat"><span>CHARGÉS</span><span class="val" id="tbCount">—</span></div>
+    <div class="topbar-stat"><span>DISPONIBLES</span><span class="val amber" id="tbAvailable">—</span></div>
+    <div class="topbar-stat"><span>PAYS</span><span class="val green" id="tbPays">—</span></div>
+    <button class="theme-toggle" id="themeToggle" title="Thème">🌙</button>
+  </div>
+</div>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="sb-head">
+      <div class="sb-title">🎛️ Filtres</div>
+      <div class="sb-count" id="sbCount">Sélectionne des filtres</div>
+    </div>
+    <div class="sb-actions">
+      <button id="btnClearFilters">✖ Tout effacer</button>
+      <button id="btnLoad">▶ Charger</button>
+    </div>
+    <div class="sb-body" id="sbBody">
+      <div class="loading" style="padding:20px;font-size:11px">
+        <div class="spin" style="width:20px;height:20px;border-width:2px"></div>
+        Initialisation…
+      </div>
+    </div>
+  </aside>
+
+  <main class="center">
+    <div class="search-bar">
+      <input type="text" id="queryInput" placeholder="🔍 Recherche texte (dans les catalogues chargés)" autocomplete="off">
+      <select id="sortSelect">
+        <option value="count_desc">Datasets ↓</option>
+        <option value="count_asc">Datasets ↑</option>
+        <option value="date_desc">Date ↓</option>
+        <option value="titre_asc">Titre A→Z</option>
+        <option value="pays_asc">Pays A→Z</option>
+      </select>
+      <button class="search-btn green" id="loadBtn">🌐 CHARGER FILTRÉ</button>
+      <button class="cancel-btn" id="cancelBtn" hidden>✖ STOP</button>
+    </div>
+
+    <div class="chips-bar" id="chipsBar" hidden></div>
+
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-view="results">📋 Catalogues</button>
+      <button class="mode-tab" data-view="pays">🌍 Par pays</button>
+      <button class="mode-tab" data-view="sourceTypes">🔌 Types</button>
+      <button class="mode-tab" data-view="analytics">📊 Analyses</button>
+    </div>
+
+    <div class="help-banner" id="helpBanner" hidden></div>
+
+    <div class="kpi-strip" id="kpiStrip"></div>
+
+    <div class="results" id="resultsArea">
+      <div class="empty">
+        <div style="font-size:48px;margin-bottom:16px">🎛️</div>
+        <div style="font-weight:700;color:var(--text);margin-bottom:8px;font-size:16px">
+          Sélectionne des filtres à gauche
+        </div>
+        <div>Puis clique sur <strong>🌐 CHARGER FILTRÉ</strong>.</div>
+        <div style="margin-top:12px;font-size:11px;color:var(--grey-500)">
+          Les requêtes passent par <code>http://localhost:8002/proxy</code>.
+        </div>
+      </div>
+    </div>
+
+    <div class="export-group">
+      <button class="export-btn" id="exportCsv" disabled>📥 CSV</button>
+      <button class="export-btn" id="exportJson" disabled>📥 JSON</button>
+      <button class="export-btn" id="clearBtn">🗑️ Effacer</button>
+    </div>
+  </main>
+
+  <aside class="right">
+    <div class="rs-head">Intelligence</div>
+    <div class="rs-body">
+      <div class="intel-panel">
+        <div class="intel-head">💚 ÉTAT</div>
+        <div class="intel-body">
+          <div class="intel-row"><span class="k">Mode</span><span class="v cyan" id="ivMode">—</span></div>
+          <div class="intel-row"><span class="k">Statut</span><span class="v green" id="ivStatus">—</span></div>
+          <div class="intel-row"><span class="k">Dernier appel</span><span class="v" id="ivLastCall">—</span></div>
+        </div>
+      </div>
+      <div class="intel-panel">
+        <div class="intel-head">📊 CHARGEMENT</div>
+        <div class="intel-body">
+          <div class="intel-row"><span class="k">Filtres actifs</span><span class="v amber" id="ivFilters">0</span></div>
+          <div class="intel-row"><span class="k">Disponibles</span><span class="v cyan" id="ivAvailable">—</span></div>
+          <div class="intel-row"><span class="k">Chargés</span><span class="v green" id="ivLoaded">—</span></div>
+          <div class="intel-row"><span class="k">Pages</span><span class="v" id="ivPages">—</span></div>
+        </div>
+      </div>
+      <div class="intel-panel">
+        <div class="intel-head">🏆 TOP 5</div>
+        <div class="intel-body" id="topRows">
+          <div style="text-align:center;color:var(--grey-500);font-size:11px;padding:8px">Chargez des données</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<script>
+/* =========================================================
+   CONFIG
+   ========================================================= */
+const API_BASE = 'https://data.europa.eu/api/hub/search/search';
+const CORS_PROXY = 'http://localhost:8002/proxy?url=';
+const PAGE_SIZE = 100;
+const MAX_PAGES = 100;
+
+const FACET_KEYS = [
+  { key: 'country', label: '🌍 Pays', max: 50 },
+  { key: 'categories', label: '📂 Thèmes', max: 30 },
+  { key: 'source_type', label: '🔌 Type de source', max: 20 },
+  { key: 'is_hvd', label: '⭐ HVD', max: 5 },
+  { key: 'catalog', label: '📚 Catalogue', max: 30 },
+  { key: 'format', label: '📄 Format', max: 20 },
+  { key: 'license', label: '⚖️ Licence', max: 15 }
+];
+
+/* =========================================================
+   ÉTAT
+   ========================================================= */
+const state = {
+  all: [], filtered: [],
+  facets: {},
+  selectedFilters: {},
+  mode: 'init',
+  theme: localStorage.getItem('catalogue-theme') || 'light',
+  available: 0,
+  loading: false,
+  abort: null
+};
+
+/* =========================================================
+   UTILITAIRES
+   ========================================================= */
+const fmtNum = n => new Intl.NumberFormat('fr-FR').format(n||0);
+const escapeHtml = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function safeSet(id, value, className){
+  const el = document.getElementById(id); if (!el) return null;
+  if (value !== undefined) el.textContent = value;
+  if (className !== undefined) el.className = className;
+  return el;
+}
+function toast(message, type='info', duration=3000){
+  const el = document.createElement('div');
+  el.className = 'toast ' + type; el.textContent = message;
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transform='translateX(120%)'; setTimeout(()=>el.remove(),300); }, duration);
+}
+function showHelpBanner(message, type='warn'){
+  const b = document.getElementById('helpBanner'); if (!b) return;
+  if (!message){ b.hidden = true; b.innerHTML = ''; return; }
+  b.hidden = false; b.className = 'help-banner' + (type==='info' ? ' info' : '');
+  b.innerHTML = message;
+}
+
+/* =========================================================
+   THÈME
+   ========================================================= */
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', state.theme);
+  const btn = document.getElementById('themeToggle');
+  if (btn) btn.textContent = state.theme === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme(){
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('catalogue-theme', state.theme);
+  applyTheme();
+}
+
+/* =========================================================
+   LANGUE
+   ========================================================= */
+function getLangValue(obj, lang='fr'){
+  if (!obj) return '';
+  if (typeof obj === 'string') return obj;
+  return obj[lang] || obj.en || obj[Object.keys(obj)[0]] || '';
+}
+
+/* =========================================================
+   NORMALISATION
+   ========================================================= */
+function normalizeCatalogue(c, idx){
+  const title = getLangValue(c.title, 'fr') || getLangValue(c.title, 'en');
+  const desc = getLangValue(c.description, 'fr') || getLangValue(c.description, 'en');
+  return {
+    id: c.id || `cat-${idx}`,
+    title: title || '(sans titre)',
+    description: desc,
+    country: c.country?.label || '—',
+    countryId: c.country?.id || '',
+    count: Number(c.count) || 0,
+    index: c.index || '—',
+    source_type: c.source_type || '—',
+    publisher: c.publisher?.name || '—',
+    publisherHomepage: c.publisher?.homepage || '',
+    homepage: c.homepage || '',
+    language: (c.language || []).map(l => l.id || l.label).filter(Boolean).join(', '),
+    themes: (c.theme_taxonomy || []).map(t => String(t).split('/').pop()).filter(Boolean).join(', '),
+    modified: c.modified || '',
+    issued: c.issued || ''
+  };
+}
+
+/* =========================================================
+   CONSTRUCTION DES FILTRES API — CORRIGÉE
+   ========================================================= */
+function buildApiFilters(){
+  const facets = {};
+  for (const [key, values] of Object.entries(state.selectedFilters)){
+    if (!values.size) continue;
+    // Pour is_hvd, la valeur doit être un booléen
+    if (key === 'is_hvd'){
+      facets[key] = [...values].map(v => v === 'true' || v === true);
+    } else {
+      facets[key] = [...values];
+    }
+  }
+  return facets;
+}
+
+function buildFacetUrl(page){
+  // Construit l'URL de l'API sans proxy d'abord
+  const params = new URLSearchParams();
+  params.set('filter', 'catalogue');           // ✅ singulier, valeur simple
+  params.set('limit', PAGE_SIZE);
+  params.set('page', page);
+  params.set('facets', 'true');
+  
+  const facets = buildApiFilters();
+  if (Object.keys(facets).length){
+    params.set('facets', JSON.stringify(facets));
+  }
+  
+  const apiUrl = `${API_BASE}?${params.toString()}`;
+  // Encapsule dans le proxy local
+  return CORS_PROXY + encodeURIComponent(apiUrl);
+}
+
+/* =========================================================
+   CHARGEMENT DES FACETTES
+   ========================================================= */
+async function loadFacets(){
+  const body = document.getElementById('sbBody');
+  if (body) body.innerHTML = `<div class="loading" style="padding:20px;font-size:11px">
+    <div class="spin" style="width:20px;height:20px;border-width:2px"></div>
+    Chargement des facettes…
+  </div>`;
+
+  try {
+    const apiUrl = `${API_BASE}?filter=catalogue&limit=1&page=0&facets=true`;
+    const url = CORS_PROXY + encodeURIComponent(apiUrl);
+    console.log('[loadFacets] URL:', url);
+    const r = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const json = await r.json();
+    console.log('[loadFacets] Réponse:', json);
+    
+    // L'API renvoie { success: true, result: { count: {...}, results: [...], facets: [...] } }
+    const root = json.result || json;
+    const facets = root.facets || [];
+    state.available = root.count?.catalogue || root.count?.total || 0;
+
+    state.facets = {};
+    for (const f of facets){
+      if (FACET_KEYS.find(fk => fk.key === f.id)){
+        state.facets[f.id] = f.items || [];
+      }
+    }
+
+    safeSet('tbAvailable', fmtNum(state.available));
+    safeSet('ivAvailable', fmtNum(state.available));
+    safeSet('ivStatus', '● PRÊT', 'v green');
+    document.getElementById('statusDot')?.classList.remove('offline');
+    renderFacets();
+    toast(`✅ Facettes chargées · ${fmtNum(state.available)} catalogues disponibles`, 'success');
+    showHelpBanner('💡 Sélectionne des filtres dans la sidebar, puis clique sur <strong>🌐 CHARGER FILTRÉ</strong>.', 'info');
+  } catch(e){
+    console.error('[loadFacets] Erreur:', e);
+    safeSet('ivStatus', '● ERREUR', 'v red');
+    document.getElementById('statusDot')?.classList.add('offline');
+    showHelpBanner(
+      `⚠️ <strong>Impossible de joindre l'API</strong> (${escapeHtml(e.message)}).<br>
+      Vérifie que ton proxy tourne sur <code>http://localhost:8002</code>.`,
+      'warn'
+    );
+    if (body) body.innerHTML = `<div style="padding:16px;font-size:12px;color:var(--grey-700);line-height:1.7">
+      <strong style="color:var(--red-marianne)">⚠️ Proxy inaccessible</strong><br><br>
+      Erreur : <code>${escapeHtml(e.message)}</code><br><br>
+      Lance <code>python3 proxy.py</code> dans un terminal,<br>
+      puis recharge cette page.
+    </div>`;
+  }
+}
+
+/* =========================================================
+   RENDU DES FACETTES
+   ========================================================= */
+function renderFacets(){
+  const body = document.getElementById('sbBody');
+  if (!body) return;
+  const panels = FACET_KEYS.map(fk => {
+    const items = state.facets[fk.key];
+    if (!items || !items.length) return '';
+    const selected = state.selectedFilters[fk.key] || new Set();
+    const sorted = [...items].sort((a,b) => (b.count||0) - (a.count||0)).slice(0, fk.max);
+    const rows = sorted.map(it => {
+      const id = String(it.id);
+      const title = typeof it.title === 'object' ? (getLangValue(it.title, 'fr') || getLangValue(it.title, 'en')) : (it.title || it.id);
+      const checked = selected.has(id) ? 'checked' : '';
+      return `<label class="facet-item ${checked?'checked':''}">
+        <input type="checkbox" data-facet="${fk.key}" data-id="${escapeHtml(id)}" ${checked}>
+        <span class="flabel" title="${escapeHtml(title)}">${escapeHtml(title)}</span>
+        <span class="fcount">${fmtNum(it.count)}</span>
+      </label>`;
+    }).join('');
+    return `<div class="facet-panel" data-panel="${fk.key}">
+      <div class="facet-head">
+        <span>${escapeHtml(fk.label)}</span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="facet-search"><input type="text" placeholder="Filtrer…" data-search="${fk.key}"></div>
+      <div class="facet-body" id="fb-${fk.key}">${rows || '<div style="text-align:center;color:var(--grey-500);font-size:11px;padding:8px">Aucun</div>'}</div>
+    </div>`;
+  }).join('');
+
+  body.innerHTML = panels || '<div style="padding:20px;text-align:center;color:var(--grey-500)">Aucune facette disponible</div>';
+
+  body.querySelectorAll('input[type=checkbox][data-facet]').forEach(cb => {
+    cb.addEventListener('change', e => {
+      const facet = cb.dataset.facet;
+      const id = cb.dataset.id;
+      if (!state.selectedFilters[facet]) state.selectedFilters[facet] = new Set();
+      if (e.target.checked) state.selectedFilters[facet].add(id);
+      else state.selectedFilters[facet].delete(id);
+      cb.closest('.facet-item').classList.toggle('checked', e.target.checked);
+      updateChips();
+      updateFilterCount();
+    });
+  });
+
+  body.querySelectorAll('.facet-head').forEach(h => {
+    h.addEventListener('click', () => h.parentElement.classList.toggle('collapsed'));
+  });
+
+  body.querySelectorAll('[data-search]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const key = inp.dataset.search;
+      const q = e.target.value.toLowerCase();
+      const container = document.getElementById(`fb-${key}`);
+      if (!container) return;
+      container.querySelectorAll('.facet-item').forEach(it => {
+        const label = it.querySelector('.flabel')?.textContent.toLowerCase() || '';
+        it.style.display = label.includes(q) ? '' : 'none';
+      });
+    });
+  });
+
+  updateFilterCount();
+}
+
+function updateFilterCount(){
+  const n = Object.values(state.selectedFilters).reduce((s,set)=>s+set.size,0);
+  safeSet('ivFilters', fmtNum(n));
+  safeSet('sbCount', n ? `${n} filtre(s) actif(s)` : 'Aucun filtre — charge tout');
+  updateChips();
+}
+
+function updateChips(){
+  const bar = document.getElementById('chipsBar');
+  if (!bar) return;
+  const chips = [];
+  for (const [facet, values] of Object.entries(state.selectedFilters)){
+    for (const v of values){
+      chips.push({ facet, value: v });
+    }
+  }
+  if (!chips.length){ bar.hidden = true; bar.innerHTML = ''; return; }
+  bar.hidden = false;
+  bar.innerHTML = `<strong style="color:var(--blue-france)">Filtres :</strong>` + chips.map(c => {
+    return `<span class="chip">${escapeHtml(c.value)} <button data-remove-facet="${c.facet}" data-remove-value="${escapeHtml(c.value)}">×</button></span>`;
+  }).join('') + `<button id="chipsClear" style="background:var(--red-marianne);color:#fff;border:none;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font-sans)">✖ Tout</button>`;
+
+  bar.querySelectorAll('[data-remove-facet]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const f = btn.dataset.removeFacet;
+      const v = btn.dataset.removeValue;
+      state.selectedFilters[f]?.delete(v);
+      renderFacets();
+      updateChips();
+      updateFilterCount();
+    });
+  });
+  document.getElementById('chipsClear')?.addEventListener('click', clearAllFilters);
+}
+
+function clearAllFilters(){
+  state.selectedFilters = {};
+  renderFacets();
+  updateChips();
+  updateFilterCount();
+}
+
+/* =========================================================
+   CHARGEMENT FILTRÉ
+   ========================================================= */
+async function loadFiltered(){
+  if (state.loading){ toast('Chargement déjà en cours', 'info'); return; }
+  state.loading = true;
+  const btn = document.getElementById('loadBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  btn.disabled = true;
+  cancelBtn.hidden = false;
+  const ctrl = new AbortController();
+  state.abort = ctrl;
+
+  state.all = [];
+  state.filtered = [];
+  safeSet('ivMode', 'API');
+  safeSet('ivStatus', '● CHARGEMENT', 'v amber');
+
+  let page = 0;  // ← l'API commence à page 0
+  let totalAvailable = null;
+
+  while (page <= MAX_PAGES){
+    if (ctrl.signal.aborted) break;
+    showLoadingProgress(page + 1, totalAvailable, state.all.length);
+    try {
+      const url = buildFacetUrl(page);
+      console.log(`[loadFiltered] Page ${page} →`, url);
+      const r = await fetch(url, { signal: ctrl.signal, headers: { 'Accept': 'application/json' } });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const json = await r.json();
+      console.log(`[loadFiltered] Page ${page} réponse:`, json);
+      
+      // Structure : { success: true, result: { count: {...}, results: [...] } }
+      const root = json.result || json;
+      const results = root.results || [];
+      const count = root.count || {};
+      
+      if (totalAvailable === null){
+        totalAvailable = count.catalogue || count.total || 0;
+        safeSet('ivAvailable', fmtNum(totalAvailable));
+        safeSet('tbAvailable', fmtNum(totalAvailable));
+      }
+      
+      if (!results.length){
+        console.log('[loadFiltered] Plus de résultats à la page', page);
+        break;
+      }
+      
+      for (const c of results) state.all.push(normalizeCatalogue(c, state.all.length));
+      safeSet('tbCount', fmtNum(state.all.length));
+      safeSet('ivLoaded', fmtNum(state.all.length));
+      safeSet('ivPages', `${page + 1}`);
+      showLoadingProgress(page + 1, totalAvailable, state.all.length, true);
+      
+      if (results.length < PAGE_SIZE) break;
+      page++;
+      await new Promise(res => setTimeout(res, 200));
+    } catch(e){
+      if (e.name === 'AbortError'){ toast('⏹️ Chargement arrêté', 'info'); break; }
+      console.error(`[loadFiltered] Erreur page ${page}:`, e);
+      toast(`⚠️ Erreur page ${page} : ${e.message}`, 'error');
+      break;
+    }
+  }
+
+  state.loading = false;
+  state.abort = null;
+  btn.disabled = false;
+  cancelBtn.hidden = true;
+
+  safeSet('ivStatus', '● CHARGÉ', 'v green');
+  safeSet('ivLastCall', new Date().toLocaleTimeString('fr-FR'));
+
+  if (!state.all.length){
+    showResults(`<div class="empty">Aucun catalogue chargé.<br>
+      Vérifie que ton proxy tourne et que les filtres ne sont pas trop restrictifs.</div>`);
+    return;
+  }
+
+  applyLocalSearch();
+  toast(`✅ ${fmtNum(state.all.length)} catalogues chargés`, 'success');
+}
+
+function showLoadingProgress(page, total, loaded, isIntermediate){
+  const pct = total ? Math.min(100, Math.round((loaded/total)*100)) : 0;
+  const area = document.getElementById('resultsArea');
+  if (!area) return;
+  area.innerHTML = `
+    <div class="loading" style="padding:40px 20px">
+      <div class="spin"></div>
+      <div style="font-weight:700;color:var(--blue-france);margin-bottom:8px;font-size:14px">Chargement page ${page}…</div>
+      ${total ? `<div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div style="font-size:12px;color:var(--grey-500)">${fmtNum(loaded)} / ${fmtNum(total)} catalogues (${pct}%)</div>` : ''}
+    </div>`;
+}
+
+/* =========================================================
+   RECHERCHE LOCALE
+   ========================================================= */
+function applyLocalSearch(){
+  const q = document.getElementById('queryInput')?.value.toLowerCase().trim() || '';
+  const sort = document.getElementById('sortSelect')?.value || 'count_desc';
+
+  state.filtered = state.all.filter(m => {
+    if (!q) return true;
+    const hay = [m.title, m.description, m.publisher, m.country, m.id, m.themes, m.language].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+
+  state.filtered.sort((a,b) => {
+    switch(sort){
+      case 'count_desc': return (b.count||0) - (a.count||0);
+      case 'count_asc':  return (a.count||0) - (b.count||0);
+      case 'date_desc':  return String(b.modified || '').localeCompare(String(a.modified || ''));
+      case 'titre_asc':  return String(a.title).localeCompare(String(b.title));
+      case 'pays_asc':   return String(a.country).localeCompare(String(b.country)) || String(a.title).localeCompare(String(b.title));
+      default: return 0;
+    }
+  });
+
+  const eCsv = document.getElementById('exportCsv');
+  const eJson = document.getElementById('exportJson');
+  if (eCsv) eCsv.disabled = !state.filtered.length;
+  if (eJson) eJson.disabled = !state.filtered.length;
+
+  renderKPIs(state.filtered);
+  renderTopRows();
+  renderResults();
+}
+
+/* =========================================================
+   KPI
+   ========================================================= */
+function renderKPIs(data){
+  const count = data.length;
+  const totalCount = data.reduce((s,m)=>s+(m.count||0),0);
+  const pays = new Set(data.map(m => m.country)).size;
+  const withPub = data.filter(m => m.publisher && m.publisher !== '—').length;
+  const kpis = [
+    { label:'Catalogues chargés', value: fmtNum(count), sub:'affichés', cls:'' },
+    { label:'Datasets cumulés', value: fmtNum(totalCount), sub:'via ces catalogues', cls:'green' },
+    { label:'Pays', value: fmtNum(pays), sub:'distincts', cls:'amber' },
+    { label:'Avec éditeur', value: fmtNum(withPub), sub:`${count?(withPub/count*100).toFixed(0):0}%`, cls:'green' },
+    { label:'Disponibles API', value: fmtNum(state.available), sub:'total filtres', cls:'' }
+  ];
+  const strip = document.getElementById('kpiStrip'); if (!strip) return;
+  strip.innerHTML = kpis.map(k => `
+    <div class="kpi ${k.cls}">
+      <div class="label">${k.label}</div>
+      <div class="value">${k.value}</div>
+      <div class="sub">${k.sub}</div>
+    </div>
+  `).join('');
+}
+
+function renderTopRows(){
+  const el = document.getElementById('topRows'); if (!el) return;
+  if (!state.filtered.length){
+    el.innerHTML = '<div style="text-align:center;color:var(--grey-500);font-size:11px;padding:8px">Aucune donnée</div>';
+    return;
+  }
+  const top = [...state.filtered].sort((a,b)=>(b.count||0)-(a.count||0)).slice(0,5);
+  el.innerHTML = top.map((m,i) => `
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--grey-100);font-size:11px;font-family:var(--font-mono);gap:8px">
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(m.title)}">${i+1}. ${escapeHtml(m.title)}</span>
+      <span style="color:var(--blue-france);font-weight:700;flex-shrink:0">${fmtNum(m.count)}</span>
+    </div>
+  `).join('');
+}
+
+/* =========================================================
+   RENDU
+   ========================================================= */
+function renderResults(){
+  const activeView = document.querySelector('.mode-tab.active')?.dataset.view || 'results';
+  const area = document.getElementById('resultsArea'); if (!area) return;
+  if (activeView === 'pays'){ renderByPays(); return; }
+  if (activeView === 'sourceTypes'){ renderBySourceType(); return; }
+  if (activeView === 'analytics'){ renderAnalytics(); return; }
+
+  if (!state.filtered.length){
+    area.innerHTML = state.all.length
+      ? `<div class="empty">Aucun résultat pour cette recherche.</div>`
+      : `<div class="empty">Sélectionne des filtres à gauche, puis clique sur 🌐 CHARGER FILTRÉ.</div>`;
+    return;
+  }
+
+  const header = `
+    <div style="font-size:12px;color:var(--grey-700);margin-bottom:12px;padding:10px 14px;
+      background:var(--bg-panel);border-radius:4px;border-left:4px solid var(--blue-france)">
+      <strong style="color:var(--blue-france)">${fmtNum(state.filtered.length)} catalogue(s)</strong>
+      · ${fmtNum(state.filtered.reduce((s,m)=>s+(m.count||0),0))} datasets cumulés
+      ${state.available ? ` · ${fmtNum(state.available)} disponibles avec ces filtres` : ''}
+    </div>`;
+
+  const cards = state.filtered.map(m => {
+    const date = m.modified ? m.modified.slice(0,10) : (m.issued ? m.issued.slice(0,10) : '');
+    const home = m.homepage || m.publisherHomepage;
+    return `
+      <div class="result-card">
+        <div class="rc-head">
+          <div class="rc-title">
+            ${home ? `<a href="${escapeHtml(home)}" target="_blank" rel="noopener">${escapeHtml(m.title)}</a>` : escapeHtml(m.title)}
+          </div>
+          <div class="rc-badges">
+            <span class="rc-badge country">🌍 ${escapeHtml(m.country)}</span>
+            <span class="rc-badge index">${escapeHtml(m.index)}</span>
+            <span class="rc-badge type">${escapeHtml(m.source_type)}</span>
+            <span class="rc-badge lang">${fmtNum(m.count)} datasets</span>
+          </div>
+        </div>
+        ${m.publisher && m.publisher !== '—' ? `<div class="rc-org">🏛️ ${escapeHtml(m.publisher)}</div>` : ''}
+        ${m.description ? `<div class="rc-desc">${escapeHtml(m.description.slice(0, 320))}</div>` : ''}
+        <div class="rc-meta">
+          ${m.id ? `<span class="tag">🆔 ${escapeHtml(m.id)}</span>` : ''}
+          ${m.language ? `<span class="tag">🗣️ ${escapeHtml(m.language)}</span>` : ''}
+          ${date ? `<span class="tag">📅 ${escapeHtml(date)}</span>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+  area.innerHTML = header + cards;
+}
+
+function renderByPays(){
+  const area = document.getElementById('resultsArea'); if (!area) return;
+  const data = state.filtered.length ? state.filtered : state.all;
+  if (!data.length){ area.innerHTML = '<div class="empty">Chargez des données.</div>'; return; }
+  const byPays = {};
+  for (const m of data){
+    if (!byPays[m.country]) byPays[m.country] = { catalogs:0, datasets:0 };
+    byPays[m.country].catalogs++;
+    byPays[m.country].datasets += m.count || 0;
+  }
+  const entries = Object.entries(byPays).sort((a,b)=>b[1].datasets - a[1].datasets);
+  const max = Math.max(...entries.map(([,d])=>d.datasets), 1);
+  const bars = entries.map(([pays, d]) => {
+    const pct = (d.datasets / max) * 100;
+    return `<div class="bar-row">
+      <div class="name">🌍 ${escapeHtml(pays)}</div>
+      <div class="bar-track"><div class="bar-fill anim-bar" style="width:0" data-w="${pct}%"></div></div>
+      <div class="val">${fmtNum(d.datasets)} · ${d.catalogs}</div>
+    </div>`;
+  }).join('');
+  area.innerHTML = `<div class="analytics-panel">
+      <div class="panel-head">🌍 DATASETS PAR PAYS</div>
+      <div class="panel-body">${bars}</div>
+    </div>`;
+  requestAnimationFrame(() => {
+    area.querySelectorAll('.anim-bar').forEach(b => { b.style.width = b.dataset.w; });
+  });
+}
+
+function renderBySourceType(){
+  const area = document.getElementById('resultsArea'); if (!area) return;
+  const data = state.filtered.length ? state.filtered : state.all;
+  if (!data.length){ area.innerHTML = '<div class="empty">Chargez des données.</div>'; return; }
+  const byType = {};
+  for (const m of data){
+    if (!byType[m.source_type]) byType[m.source_type] = { catalogs:0, datasets:0 };
+    byType[m.source_type].catalogs++;
+    byType[m.source_type].datasets += m.count || 0;
+  }
+  const entries = Object.entries(byType).sort((a,b)=>b[1].datasets - a[1].datasets);
+  const max = Math.max(...entries.map(([,d])=>d.datasets), 1);
+  const bars = entries.map(([type, d]) => {
+    const pct = (d.datasets / max) * 100;
+    return `<div class="bar-row">
+      <div class="name">🔌 ${escapeHtml(type)}</div>
+      <div class="bar-track"><div class="bar-fill green anim-bar" style="width:0" data-w="${pct}%"></div></div>
+      <div class="val">${fmtNum(d.datasets)} · ${d.catalogs}</div>
+    </div>`;
+  }).join('');
+  area.innerHTML = `<div class="analytics-panel">
+      <div class="panel-head">🔌 DATASETS PAR TYPE DE SOURCE</div>
+      <div class="panel-body">${bars}</div>
+    </div>`;
+  requestAnimationFrame(() => {
+    area.querySelectorAll('.anim-bar').forEach(b => { b.style.width = b.dataset.w; });
+  });
+}
+
+function renderAnalytics(){
+  const area = document.getElementById('resultsArea'); if (!area) return;
+  const data = state.filtered.length ? state.filtered : state.all;
+  if (!data.length){ area.innerHTML = '<div class="empty">Chargez des données.</div>'; return; }
+
+  const byType = {};
+  for (const m of data) byType[m.source_type] = (byType[m.source_type]||0) + 1;
+  const topOrgs = {};
+  for (const m of data){ if (m.publisher && m.publisher !== '—') topOrgs[m.publisher] = (topOrgs[m.publisher]||0) + 1; }
+
+  const bars = (obj, color, top) => {
+    const arr = Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0, top || 12);
+    const max = Math.max(...arr.map(x=>x[1]), 1);
+    return arr.map(([k,v]) => {
+      const pct = (v/max)*100;
+      return `<div class="bar-row">
+        <div class="name">${escapeHtml(k)}</div>
+        <div class="bar-track"><div class="bar-fill ${color||''} anim-bar" style="width:0" data-w="${pct}%"></div></div>
+        <div class="val">${fmtNum(v)}</div>
+      </div>`;
+    }).join('');
+  };
+
+  area.innerHTML = `
+    <div class="analytics-grid">
+      <div class="analytics-panel">
+        <div class="panel-head">🔌 CATALOGUES PAR TYPE</div>
+        <div class="panel-body">${bars(byType)}</div>
+      </div>
+      <div class="analytics-panel">
+        <div class="panel-head">🏛️ TOP 12 ÉDITEURS</div>
+        <div class="panel-body">${bars(topOrgs, 'green', 12) || '<div style="text-align:center;color:var(--grey-500)">Aucun éditeur</div>'}</div>
+      </div>
+    </div>`;
+  requestAnimationFrame(() => {
+    area.querySelectorAll('.anim-bar').forEach(b => { b.style.width = b.dataset.w; });
+  });
+}
+
+/* =========================================================
+   ÉVÉNEMENTS
+   ========================================================= */
+document.getElementById('loadBtn')?.addEventListener('click', loadFiltered);
+document.getElementById('cancelBtn')?.addEventListener('click', () => { if (state.abort) state.abort.abort(); });
+document.getElementById('btnLoad')?.addEventListener('click', loadFiltered);
+document.getElementById('btnClearFilters')?.addEventListener('click', clearAllFilters);
+document.getElementById('queryInput')?.addEventListener('input', () => {
+  clearTimeout(window._deb);
+  window._deb = setTimeout(() => { if (state.all.length) applyLocalSearch(); }, 250);
+});
+document.getElementById('sortSelect')?.addEventListener('change', () => { if (state.all.length) applyLocalSearch(); });
+document.querySelectorAll('.mode-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.mode-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    renderResults();
+  });
+});
+document.getElementById('exportCsv')?.addEventListener('click', () => {
+  const cols = ['id','title','country','count','index','source_type','publisher','homepage','language','themes','modified','issued','description'];
+  const esc = v => `"${String(v??'').replace(/"/g,'""')}"`;
+  const rows = [cols.join(',')];
+  for (const m of state.filtered){
+    rows.push(cols.map(c => esc(m[c])).join(','));
+  }
+  const blob = new Blob(['\ufeff' + rows.join('\n')], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'catalogue-export.csv'; a.click();
+  toast('📥 CSV exporté', 'success');
+});
+document.getElementById('exportJson')?.addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(state.filtered, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'catalogue-export.json'; a.click();
+  toast('📥 JSON exporté', 'success');
+});
+document.getElementById('clearBtn')?.addEventListener('click', () => {
+  state.all = []; state.filtered = [];
+  state.selectedFilters = {};
+  const qi = document.getElementById('queryInput'); if (qi) qi.value = '';
+  safeSet('tbCount', '—'); safeSet('tbAvailable', '—'); safeSet('tbPays', '—');
+  safeSet('ivAvailable', '—'); safeSet('ivLoaded', '—'); safeSet('ivPages', '—');
+  document.getElementById('exportCsv').disabled = true;
+  document.getElementById('exportJson').disabled = true;
+  updateChips();
+  renderFacets();
+  showResults(`<div class="empty">Sélectionne des filtres puis clique sur 🌐 CHARGER FILTRÉ.</div>`);
+  toast('🗑️ Données effacées', 'info');
+});
+document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
+
+const showResults = html => { const el = document.getElementById('resultsArea'); if (el) el.innerHTML = html; };
+
+/* =========================================================
+   INIT
+   ========================================================= */
+applyTheme();
+safeSet('ivMode', 'INIT');
+safeSet('ivStatus', '● INIT', 'v amber');
+loadFacets();
+</script>
+
+</body>
+</html>
